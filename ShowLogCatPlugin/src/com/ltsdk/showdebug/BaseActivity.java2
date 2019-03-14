@@ -1,0 +1,200 @@
+
+package com.ltsdk.showdebug;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+
+
+/** BaseActivity，继承Activity中的所有功能函数，作为功能、变量转接层，封装子Activity中的所有功能。 在proxyActivity通过反射调用BaseActivity中的功能函数，实现代理显示和执行功能。 */
+public class BaseActivity extends Activity
+{
+	/** 当前Activity的所有功能和逻辑，将在proxyActivity中执行和展示 */
+	protected Activity proxyActivity;
+	
+	public void SetProxyActivy(Activity context)
+	{
+		proxyActivity = context;
+	}
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		// proxyActivity中已实现该接口，故此处留空。proxyActivity中通过plugin.onCreate(extras); 调用子类的初始化功能
+	}
+	
+	@Override
+	public View findViewById(int id)
+	{
+		return proxyActivity.findViewById(id);
+	}
+	
+	@Override
+	public void finish()
+	{
+		proxyActivity.finish();
+	}
+	
+	public void onStart()
+	{	
+		
+	}
+	
+	public void onResume()
+	{	
+		
+	}
+	
+	@Override
+	public void onRestart()
+	{	
+		
+	}
+	
+	public void onPause()
+	{	
+		
+	}
+	
+	public void onStop()
+	{	
+		
+	}
+	
+	public void onDestroy()
+	{	
+		
+	}
+	
+	public void onSaveInstanceState(Bundle outState)
+	{	
+		
+	}
+	
+	public boolean onTouchEvent(MotionEvent event)
+	{
+		return false;
+	}
+	
+	public void onBackPressed()
+	{
+		proxyActivity.onBackPressed();
+	}
+	
+	@Override
+	public void startActivity(Intent intent)
+	{
+		proxyActivity.startActivity(intent);
+	}
+
+	// ------
+	
+	public Intent getIntent()
+	{
+		return proxyActivity.getIntent();
+	}
+	
+	@Override
+	public LayoutInflater getLayoutInflater()
+	{
+		return proxyActivity.getLayoutInflater();
+	}
+	
+	public Context getApplicationContext()
+	{
+		return proxyActivity.getApplicationContext();	// 获取context, context为proxyActivity中的值
+	}
+	
+	@Override
+	public Window getWindow()
+	{
+		return proxyActivity.getWindow();
+	}
+	
+	@Override
+	public ClassLoader getClassLoader()
+	{
+		return proxyActivity.getClassLoader();
+	}
+	
+	@Override
+	public WindowManager getWindowManager()
+	{
+		return proxyActivity.getWindowManager();
+	}
+	
+	@Override
+	public ApplicationInfo getApplicationInfo()
+	{
+		return proxyActivity.getApplicationInfo();
+	}
+	
+	public String getPackageName()
+	{
+		return proxyActivity.getPackageName();
+	}
+	
+	public Resources.Theme getTheme()
+	{
+		return proxyActivity.getTheme();
+	}
+	
+	public Resources getResources()
+	{
+		return proxyActivity.getResources();
+	}
+	
+	public Object getSystemService(String name)
+	{
+		Object obj = proxyActivity.getSystemService(name);
+		return obj;
+//		return proxyActivity.getSystemService(name);
+	}
+
+//	public View getDecorView()
+//	{
+//		Window w = PolicyManager.makeNewWindow(mContext);
+//		
+//		return proxyActivity.getDecorView();
+//	}
+	
+	// ------
+	
+	@Override
+	public void setContentView(int layoutResID)
+	{
+		proxyActivity.setContentView(layoutResID);
+	}
+	
+	@Override
+	public void setContentView(View view)
+	{
+		proxyActivity.setContentView(view);			// 在代理Activity中展示view
+	}
+	
+	@Override
+	public void setContentView(View view, ViewGroup.LayoutParams params)
+	{
+		proxyActivity.setContentView(view, params); // 在代理Activity中展示
+	}
+	
+	public void setTitle(CharSequence title)
+	{
+		proxyActivity.setTitle(title);
+	}
+	
+	// public void onClick(View view)
+	// {
+	// Log.e("showText", "onClick " );
+	// }
+	//
+}

@@ -1,0 +1,161 @@
+
+package sci.apk.plugin;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+
+
+public class PluginInterface
+{
+	Class<?> classType;
+	Object classObj;
+	
+	/** 插件接口，创建BaseActivity子类对象。反射调用类中的相关接口并封装（供在ProxyActiviy使用） */
+	public PluginInterface(Activity proxyActivity, String className)
+	{
+		try
+		{
+			classType = Class.forName(className);	// 获取类类型
+			classObj = classType.newInstance();		// 创建类实例
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		
+		SetProxyActivy(proxyActivity);
+	}
+	
+	private void SetProxyActivy(Activity context)
+	{
+		CallMethod("SetProxyActivy", Activity.class, context);	// 反射调用函数方法attachContext(Activity context)
+	}
+	
+	public void onCreate(Bundle saveInstance)
+	{
+		CallMethod("onCreate", Bundle.class, saveInstance);		// 反射调用函数方法onCreate(Bundle saveInstance)
+	}
+	
+	public void onStart()
+	{
+		CallMethod("onStart");
+	}
+	
+	public void onResume()
+	{
+		CallMethod("onResume");
+	}
+	
+	public void onRestart()
+	{
+		CallMethod("onRestart");
+	}
+	
+	public void onDestroy()
+	{
+		CallMethod("onDestroy");
+	}
+	
+	public void onStop()
+	{
+		CallMethod("onStop");
+	}
+	
+	public void onPause()
+	{
+		CallMethod("onPause");
+	}
+	
+	/** 调用对应点击事件，反射调用指定的方法methodName(View view) */
+	public void ClickView(String methodName, Object view)
+	{
+		CallMethod(methodName, View.class, view);
+	}
+	
+	// ----------------
+	
+	/** 反射调用函数methodName() */
+	public Object CallMethod(String methodName)
+	{
+		Object result = null;
+		Method methodObj = null;
+		try
+		{
+			methodObj = classType.getMethod(methodName); 		// 获取类中的函数方法
+			result = methodObj.invoke(classObj);				// 反射调用函数方法classObj.methodName()
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		if (methodObj == null) throw new IllegalStateException("Could not find a method " + methodName + "() in the class " + classType.getName());
+		
+		return result;
+	}
+	
+	/** 反射调用函数methodName(argClass argObj) */
+	public Object CallMethod(String methodName, Class<?> argClass, Object argObj)
+	{
+		Object result = null;
+		Method methodObj = null;
+		try
+		{
+			methodObj = classType.getMethod(methodName, argClass); 	// 获取类中的函数方法
+			result = methodObj.invoke(classObj, argObj);			// 反射调用函数方法classObj.methodName(argObj)
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		if (methodObj == null)
+			throw new IllegalStateException("Could not find a method " + methodName + "(" + argClass.getSimpleName() + ") in the class " + classType.getName());
+		
+		return result;
+	}
+	
+	/** 反射调用函数methodName(...argObj) */
+	public Object CallMethodX(String methodName, Object... argObj)
+	{
+		Object result = null;
+		Method methodObj = null;
+		
+		Class<?>[] argClass = null;
+		try
+		{
+			// 获取参数类型
+			List<Class<?>> list = new ArrayList<Class<?>>();
+			for (Object arg : argObj)
+			{
+				list.add(arg.getClass());
+			}
+			argClass = new Class<?>[list.size()];
+			list.toArray(argClass);
+			
+			methodObj = classType.getMethod(methodName, argClass); 	// 获取类中的函数方法
+			result = methodObj.invoke(classObj, argObj);			// 反射调用函数方法classObj.methodName(argObj)
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		
+		if (methodObj == null)
+		{
+			String argsType = "";
+			for (Class<?> cls : argClass)
+			{
+				argsType += cls.getSimpleName() + ", ";
+			}
+			if (argsType.length() > 2) argsType = argsType.substring(0, argsType.length() - 2);
+			
+			throw new IllegalStateException("Could not find a method " + methodName + "(" + argsType + ") in the class " + classType.getName());
+		}
+		
+		return result;
+	}
+}

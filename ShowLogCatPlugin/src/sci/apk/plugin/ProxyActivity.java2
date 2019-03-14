@@ -1,0 +1,142 @@
+
+package sci.apk.plugin;
+
+import java.util.List;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+
+
+/** 
+ * 代理Activity,封装Activity的生命周期函数，为一个空壳。通过参数，载入并创建对应的插件Activity对象，展示对应功能。
+ * 
+ * 通过ProxyActivity展示子类Activity, 示例：
+ * ProxyActivity.Start(context, "com.ltsdk.showdebug.MainActivity");
+ **/
+public class ProxyActivity extends Activity
+{
+	/** 通过ProxyActivity展示targetActivity，要求targetActivity必须为BaseActivity的子类 */
+	public static void Start(Context context, String targetActivityName)
+	{
+		Intent intent = new Intent(context, ProxyActivity.class);
+		intent.putExtra("target_ActivityName", targetActivityName );
+		context.startActivity(intent);
+	}
+	
+	//---------
+	
+	PluginInterface plugin;
+	
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		
+		String className = getIntent().getStringExtra("target_ActivityName"); 	// 获取BaseActivity的子类信息
+		plugin = new PluginInterface(this, className);						 	// 从BaseActivity子类创建plugin，执行具体插件Activity功能逻辑
+
+		
+		Bundle extras = getIntent().getExtras();
+		extras.remove("target_ActivityName");
+		plugin.onCreate(extras);					// 调用插件Activity初始化
+		
+		Adapt_LayoutView_Onclick(this);				// 改写布局View中的Onclick
+	}
+	
+	@Override
+	public void startActivity(Intent intent)
+	{
+		Intent newIntent = new Intent(this, ProxyActivity.class);
+		newIntent.putExtras(intent.getExtras());											// BaseActivity子类启动参数
+		newIntent.putExtra("target_ActivityName", intent.getComponent().getClassName());	// ProxyActivity将代理显示的类
+		
+		super.startActivity(newIntent);
+	}
+	
+	@Override
+	public void onStart()
+	{
+		plugin.onStart();
+		super.onStart();
+	}
+	
+	@Override
+	public void onResume()
+	{
+		plugin.onResume();
+		super.onResume();
+	}
+	
+	@Override
+	public void onRestart()
+	{
+		plugin.onRestart();
+		super.onRestart();
+	}
+	
+	@Override
+	public void onDestroy()
+	{
+		plugin.onDestroy();
+		super.onDestroy();
+	}
+	
+	@Override
+	public void onStop()
+	{
+		plugin.onStop();
+		super.onStop();
+	}
+	
+	@Override
+	public void onPause()
+	{
+		plugin.onPause();
+		super.onPause();
+	}
+	
+	@Override
+	public void setContentView(int layoutResID)
+	{
+		super.setContentView(layoutResID);
+	}
+
+	@Override
+	public void setContentView(View view)
+	{
+		super.setContentView(view);
+	}
+	
+	@Override
+	public void setContentView(View view, ViewGroup.LayoutParams params)
+	{
+		super.setContentView(view, params);
+	}
+	
+	/**  映射res/layout布局文件中View对应的Onclick属性对应函数方法(如：android:onClick="button1_Click")，至插件Activity下的对应函数。
+	 * （解析设置布局后，View中设定的OnClick函数名，新建OnclickListener指向插件Activity中的对应函数） */
+	private void Adapt_LayoutView_Onclick(Activity activity)
+	{
+		List<View> views = ViewTool.Childs(activity);
+		for(View view : views)
+		{
+			final String name = ReflectTool.get_onClickName(view);	// 获取反射方法名
+			if(!name.equals(""))
+			{
+				view.setOnClickListener(new OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						plugin.ClickView(name, v);		// 调用对应点击事件
+					}
+				});
+			}
+		}
+	}
+	
+}

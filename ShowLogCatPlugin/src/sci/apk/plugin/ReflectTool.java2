@@ -1,0 +1,148 @@
+
+package sci.apk.plugin;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.ArrayMap;
+import android.view.View;
+import android.view.ViewGroup;
+
+
+public class ReflectTool
+{
+	public static HashMap<Class<?>, Object> ClassInstanceMap = new HashMap<Class<?>, Object>();
+	
+	/** 调用函数 classInstance.methodInstance(args) */
+	public static Object[] GetClassMethod(Class<?> classType, String methodName, Class<?>... parameterTypes)
+	{
+		try
+		{
+			Object classInstance = null;
+			if (ClassInstanceMap.containsKey(classType))
+				classInstance = ClassInstanceMap.get(classType);
+			else
+			{
+				classInstance = classType.newInstance();								// 创建类新实例
+				ClassInstanceMap.put(classType, classInstance);
+			}
+			Method methodInstance = classType.getMethod(methodName, parameterTypes);	// 获取类中的函数方法
+			return new Object[] { classInstance, methodInstance };
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			return null;
+		}
+	}
+	
+	/** 调用函数 classInstance.methodInstance(args) */
+	public static Object Invoke(Object classInstance, Method methodInstance, Object... args)
+	{
+		try
+		{
+			Object result = methodInstance.invoke(classInstance, args);
+			return result;
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+			return null;
+		}
+	}
+	
+	/** 调用函数 ClassMethod(args) */
+	public static Object Invoke(Object[] ClassMethod, Object... args)
+	{
+		if (ClassMethod == null)
+			return null;
+		else return Invoke(ClassMethod[0], (Method) ClassMethod[1], args);
+	}
+	
+	
+	/** 反射获取obj的成员变量fieldName（成员变量名获取，可在调试时动态查看） */
+	public static Object getSubField(Object obj, String fieldName)
+	{
+		Object subObj = null;
+		try
+		{
+			if (obj != null)
+			{
+				Field field = obj.getClass().getDeclaredField(fieldName);	// 获取成员变量对应的Field方法
+				field.setAccessible(true);	// 设置为可访问
+				subObj = field.get(obj);	// 通过Field方法从Object中提取子变量
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		return subObj;
+	}
+	
+	/** 反射获取obj的成员变量fieldName（成员变量名获取，可在调试时动态查看） */
+	public static Object getSubField(Object obj, Class<?> cls, String fieldName)
+	{
+		Object subObj = null;
+		try
+		{
+			if (obj != null)
+			{
+				Field field = cls.getDeclaredField(fieldName);	// 获取成员变量对应的Field方法
+				field.setAccessible(true);	// 设置为可访问
+				subObj = field.get(obj);	// 通过Field方法从Object中提取子变量
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		return subObj;
+	}
+	
+	/** 通过反射，获取View的在res/Layout布局中声明的onClick属性名称 */
+	public static String get_onClickName(View view)
+	{
+		String Name = "";
+		
+		// 反射 View.mListenerInfo.mOnClickListener.val$handlerName
+		try
+		{
+			Object mListenerInfo = getSubField(view, View.class, "mListenerInfo");
+			Object mOnClickListener = getSubField(mListenerInfo, "mOnClickListener");
+			Object handlerName = getSubField(mOnClickListener, "val$handlerName");
+			Name = handlerName.toString();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+		return Name;
+	}
+	
+	public static ArrayMap<String, Object> GetMap(Bundle bundle)
+	{
+		ArrayMap<String, Object> map = null;
+		try
+		{
+			Object mMap = getSubField(bundle, "mMap");
+			map = (ArrayMap<String, Object>) mMap;
+		}
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+		return map;
+	}
+	
+	
+
+
+}

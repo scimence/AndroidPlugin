@@ -1,0 +1,24 @@
+package com.ltsdk.showdebug;
+
+import sci.apk.plugin.ProxyActivity;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+
+public class Entry extends Activity
+{	
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		
+		ProxyActivity.Start(this, MainActivity.class.getName());	// 通过ProxyActivity执行MainActivity功能
+	}
+	
+	/** 启动ProxyActivity, 在该Activity中执行targetActivity的所有逻辑 */
+	public void ProxyActivityStart(String targetActivity)
+	{
+		Intent intent = new Intent(this, ProxyActivity.class);
+		intent.putExtra("className", targetActivity );
+		this.startActivity(intent);
+	}
+}

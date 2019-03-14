@@ -1,0 +1,86 @@
+
+package sci.apk.plugin;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
+import android.content.res.Resources;
+import dalvik.system.DexClassLoader;
+
+/** PluginManager.java: 用于载入功能apk中的相关资源 ----- 2019-3-8 下午4:35:59 wangzhongyuan */
+public class PluginManager
+{
+	private static PluginManager ourInstance = new PluginManager();
+	public static PluginManager getInstance()
+	{
+		return ourInstance;
+	}
+	
+	private Context context;
+	
+	private DexClassLoader pluginDexClassLoader;
+	public DexClassLoader getPluginDexClassLoader()
+	{
+		return pluginDexClassLoader;
+	}
+
+	private PackageInfo pluginPackageArchiveInfo;
+	public PackageInfo getPluginPackageArchiveInfo()
+	{
+		return pluginPackageArchiveInfo;
+	}
+	
+	private Resources pluginResources;
+	public Resources getPluginResources()
+	{
+		return pluginResources;
+	}
+	
+	
+	private PluginManager()
+	{}
+	
+	public void setContext(Context context)
+	{
+		this.context = context.getApplicationContext();
+	}
+	
+	/** 载入插件apk */
+	public void loadApk(String dexPath)
+	{
+		// (String dexPath, String optimizedDirectory, String librarySearchPath, ClassLoader parent)
+		pluginDexClassLoader = new DexClassLoader(dexPath, context.getDir("dex", Context.MODE_PRIVATE).getAbsolutePath(), null, context.getClassLoader());
+		
+		pluginPackageArchiveInfo = context.getPackageManager().getPackageArchiveInfo(dexPath, PackageManager.GET_ACTIVITIES);
+		
+		// Resources(AssetManager assets, DisplayMetrics metrics, Configuration config) {
+		AssetManager assets = null;
+		try
+		{
+			assets = AssetManager.class.newInstance();
+			Method addAssetPath = AssetManager.class.getMethod("addAssetPath", String.class);
+			addAssetPath.invoke(assets, dexPath);
+		}
+		catch (InstantiationException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+		catch (NoSuchMethodException e)
+		{
+			e.printStackTrace();
+		}
+		catch (InvocationTargetException e)
+		{
+			e.printStackTrace();
+		}
+		pluginResources = new Resources(assets, context.getResources().getDisplayMetrics(), context.getResources().getConfiguration());
+	}
+}

@@ -1,0 +1,77 @@
+package sci.apk.plugin;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.app.Activity;
+import android.view.View;
+import android.view.ViewGroup;
+
+public class ViewTool
+{	
+
+	/** 获取 activity中的所有view */
+	public static List<View> Childs(Activity act)
+	{
+		View activityRoot = act.getWindow().getDecorView();
+		List<View> list = Childs(activityRoot, false);
+		
+		return list;
+	}
+	
+	/** 获取当前View的所有子view */
+	public static List<View> Childs(View view, boolean ContainsThis)
+	{
+		List<View> viewList = new ArrayList<View>();
+		
+		if (!viewList.contains(view)) viewList.add(view);
+		if (view instanceof ViewGroup)
+		{
+			ViewGroup group = (ViewGroup) view;
+			for (int i = 0; i < group.getChildCount(); i++)
+			{
+				View child = group.getChildAt(i);
+				if (!viewList.contains(child)) viewList.add(child);
+				
+				// 添加child的子节点
+				List<View> subList = Childs(child, true);
+				for (View v : subList)
+				{
+					if (!viewList.contains(v)) viewList.addAll(subList);
+				}
+			}
+		}
+		
+		if (!ContainsThis) viewList.remove(view);
+		
+		return viewList;
+	}
+	
+	
+	/** 根据资源id，获取资源名称 club.scimence.www.app_second:id/thumbsup_tittle_bg */
+	public static String getResourceName(Activity context, int resid, boolean contianPackageName)
+	{
+		if (resid == -1) return "";
+		String pageResName = context.getResources().getResourceName(resid);
+		
+		if (contianPackageName)
+			return pageResName;
+		else
+		{
+			String packagePerfix = context.getPackageName() + ":id/";
+			
+			String Id = "";
+			if (pageResName.startsWith(packagePerfix)) Id = pageResName.substring(packagePerfix.length());
+			
+			return Id;
+		}
+	}
+	
+	/** 获取View对应的id字符串不含包名前缀，如：thumbsup_tittle_bg */
+	public static String getViewId(Activity context, View view)
+	{ 
+		int resId = view.getId();
+		String Id = getResourceName(context, resId, false);
+		return Id;
+	}	
+}
