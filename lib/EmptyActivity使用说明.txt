@@ -1,0 +1,55 @@
+
+//////////////////////////////////////////////////////////////////////////////
+
+使用示例：（用于制作应用壳，可以启动任意功能插件）
+
+1、在libs中，添加EmptyActivity.jar
+2、Manifest.xml中，添加<activity android:name="sci.apk.plugin.EmptyActivity" />
+3、启动插件：EmptyActivity.ShowPlugin(this, apkPath);
+
+//////////////////////////////////////////////////////////////////////////////
+
+
+public class MainActivity extends Activity
+{
+	@Override
+	protected void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.empty_activity_main);
+	}
+	
+	public void OpenPlugin(View view)
+	{
+		String apkPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/backups/apps/AndroidPlugin_plugin1.apk";
+		if(!new File(apkPath).exists()) Toast.makeText(this, "插件不存在！", Toast.LENGTH_SHORT).show();
+		else
+		{
+			EmptyActivity.ShowPlugin(this, apkPath);								// 启动插件
+	//		EmptyActivity.Show(this, apkPath, "com.ltsdk.showdebug.MainActivity");	// 通过EmptyActivity执行插件apk指定Activity的功能
+		}
+	}
+}
+
+
+
+<application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        android:icon="@drawable/empty_ic_launcher" >
+        
+        <activity
+            android:name="com.app.empty_shell.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 通过EmptyActivity展示任意插件Activity -->
+        <activity android:name="sci.apk.plugin.EmptyActivity" />
+        
+</application>

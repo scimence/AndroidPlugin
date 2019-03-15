@@ -1,0 +1,26 @@
+
+//////////////////////////////////////////////////////////////////////////////
+
+使用示例：（用于制作功能插件apk）
+
+1、在libs中，添加BaseActivity.jar
+2、修改应用内所有Activity继承自BaseActivity
+3、生成插件：编译生成apk，即可作为插件使用(是独立应用，也是插件）
+
+//////////////////////////////////////////////////////////////////////////////
+
+/** 插件应用主Activity */
+// public class MainActivity extends Ativity 
+public class MainActivity extends BaseActivity
+{
+	@Override
+	public void onCreate(Bundle savedInstanceState)
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+	}
+
+	...
+	.
+	.
+}
