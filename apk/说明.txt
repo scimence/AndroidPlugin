@@ -1,0 +1,5 @@
+﻿
+开发插件应用应包含（插件壳应用 + n个插件apk）
+
+AndroidPlugin_EmptyShell.apk 	为任意应用壳，可在其中加载和打开任意插件apk
+AndroidPlugin_plugin1.apk	为一个插件应用示例（可继承BaseActivity开发你自己的任意插件）
